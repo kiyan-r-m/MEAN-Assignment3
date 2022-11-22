@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+<body>
+    <form id = "vehicleform">
+        brand:
+        <input type="text" name="brand" id="" class="form-control"><br>
+        Category:
+        <select name="categoryName" id="categoryDropdown"class="form-control"></select><br>
+        Price:
+        <input type="text" name="price" id="price" class="form-control"><br>
+        Photo:
+        <input type="file" name="picture" id="image" class="form-control">
+        <br>
+        Depreciation:
+        <input type="text" name="depreciation" id="depreciation" class="form-control"><br>
+        Age:
+        <input type="text" name="age" id="age" class="form-control" onchange="calc()"><br>
+        Total Price:
+        <input type="text" name="totalPrice" id="totalPrice" class="form-control" disabled><br>
+        <input type="submit" value="Add Car" id="submitBtn" class="btn btn-success">
+    </form>
+    <table id="vehicleRow" class="table">
+        <tr>
+            <th>brand</th>
+            <th>category</th>
+            <th>price</th>
+            <th>picture</th>
+            <th>depreciation</th>
+            <th>age</th>
+            <th>Total Price</th>
+        </tr>
+    </table>
+</body>
+<script>
+    function calc()
+        {
+            let price = document.getElementById('price').value
+            let age = document.getElementById('age').value
+            let depreciation = document.getElementById('depreciation').value
+            for(i=0; i<age; i++)
+            {
+                price = price-(price*depreciation/100)
+            }
+            document.getElementById('totalPrice').setAttribute('value', price)
+        }
+    $(document).ready(function(){
+       $.ajax({
+            type: "GET",
+            url: "http://localhost:5000/vehicle/category",
+            success: function(data){
+                console.log(data)
+                let s = `<option value = "-1"> Select Category</option>`;
+                for(let item of data)
+                {
+                    s+=`<option value="${item.categoryName}">${item.categoryName}</option>`
+                }
+                console.log(s)
+                $("#categoryDropdown").html(s)
+            }
+        })
+
+        $.ajax({
+            type:"GET",
+            url:"http://localhost:5000/vehicle",
+            success: function(data){
+                for(let item of data)
+                {
+
+                    let s = `<tr>
+                        <th>${item.brand}</th>
+                        <th>${item.categoryName}</th>
+                        <th>${item.price}</th>
+                        <th><img src="${item.picture}" height="100" width="100"></th>
+                        <th>${item.depreciation}</th>
+                        <th>${item.age}</th>
+                        <th>${item.totalPrice}</th>
+                        </tr>`
+                        $('#vehicleRow').append(s)
+                }
+                }
+        })
+
+        
+
+        /*$.get("http://5000/vehicle/category", function(data){
+            console.log(data)
+            var sel = $("#categoryDropdown")
+            for(var i = 0; i<data.length(); i++)
+            {
+                sel.append(`<option value=${data[i].categoryName}> ${data[i].categoryName}</option>`)
+            }
+        })*/
+
+        $("#submitBtn").click(function(ev)
+        {
+            var form = $("#vehicleform")
+            var url = "http://localhost:5000/vehicle";
+            $.ajax({
+                type: "POST",
+                url : url,
+                data: form.serialize(),
+                success: function(data){
+                    alert("Success");
+                },
+                error: function(data){
+                    console.log(data)
+                    alert(data)
+                }
+            })
+        })
+
+    })
+</script>
+</html>
